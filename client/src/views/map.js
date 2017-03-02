@@ -1,10 +1,12 @@
 //// HANDLE MOVEMENT ON MAP ////////////
 var Game = require('./game');
-
+var UI = require('./ui');
 //// need to require player for coordinates ////////
 var Map = function(pokemonData, Player, Pokemon) {
 
+  
   var game = new Game(pokemonData, Player, Pokemon);
+  var ui = new UI(game, welcomeScreen, chooseScreen, fightScreen, homeScreen, craigScreen, mapCanvas);
   var welcomeScreen = document.querySelector('#welcomeScreen');
   var chooseScreen = document.querySelector('#choose_screen');
   var fightScreen = document.querySelector('#fight_screen');
@@ -57,7 +59,7 @@ var Map = function(pokemonData, Player, Pokemon) {
 
 
 
-  preloadFirstThreePokemon = function() {
+  var preloadFirstThreePokemon = function() {
     bulbasaurPic.onload = function() {
       chooseScreen.appendChild(bulbasaurPic);
     }
@@ -70,7 +72,7 @@ var Map = function(pokemonData, Player, Pokemon) {
   };
   preloadFirstThreePokemon();
 
-  loadCanvas = function() {
+  var loadCanvas = function() {
     pavement.onload = function() {
       context.drawImage(this, 0, 0, 580, 460);
       ashDown.onload = function() {
@@ -127,7 +129,7 @@ var Map = function(pokemonData, Player, Pokemon) {
     }; 
   };
 
-  drawMap = function() {
+  var drawMap = function() {
     context.drawImage(pavement, 0, 0, 580, 460);
     context.drawImage(house, 0, 270, 150, 130);
     context.drawImage(gym, 0, 0, 220, 170);
@@ -265,18 +267,7 @@ var Map = function(pokemonData, Player, Pokemon) {
   };
 
 
-  var initiateFight = function(opponant){
-    if (game.player.pokemonOnHand.length >= 1 && opponant.pokemonOnHand.length >= 1) {
-      console.log(opponant);
-      toggleViews(mapCanvas, fightScreen);
-
-     fightScreen.innerHTML = "<img id='playerPokemon' src="+ game.player.pokemonOnHand[0].back_picture+ "></img><p id='player_name'>"+game.player.name+"</p><p id='player_pok_name'>"+game.player.pokemonOnHand[0].name+"</p><progress id='player_pok_hp' value="+game.player.pokemonOnHand[0].fightHp+" max="+game.player.pokemonOnHand[0].hp+"></progress><img id='opponantPokemon' src="+ opponant.pokemonOnHand[0].front_picture+"></img><p id='opponant_pok_name'>"+opponant.pokemonOnHand[0].name+"</p><progress id='opponant_pok_hp' value="+opponant.pokemonOnHand[0].fightHp+" max="+opponant.pokemonOnHand[0].hp+"></progress><img id='fight_textbox' src='/img/message.png'></img>";
-
-     fightScreen.innerHTML += "<p id='move_text'>Your "+game.player.pokemonOnHand[0].name+" fights against "+opponant.pokemonOnHand[0].name+"!</p>";
-      generateMiniatures(game.player, opponant);
-      
-    }
-  }
+  
 
 
   ///////////// GRASS FIGHT ON /////////////////////////////////////////////////////////////////
@@ -291,7 +282,13 @@ var Map = function(pokemonData, Player, Pokemon) {
         console.log('you are being attacked');
    
         fightOpponant = game.grassOpponant;
-        initiateFight(fightOpponant);
+        if (game.player.pokemonOnHand.length >= 1 && fightOpponant.pokemonOnHand.length >= 1) {
+          console.log(opponant);
+          toggleViews(mapCanvas, fightScreen);
+          ui.initiateFight(game, fightOpponant);
+   
+          generateMiniatures(game.player, fightOpponant);
+        }
         console.log(fightOpponant);
       }
     }
@@ -671,19 +668,18 @@ var Map = function(pokemonData, Player, Pokemon) {
           console.log('fight called');
         
 
-        updateUI = function(){
-          fightScreen.innerHTML = "<img id='playerPokemon' src="+ game.player.pokemonOnHand[0].back_picture+ "></img><p id='player_name'>"+game.player.name+"</p><p id='player_pok_name'>"+game.player.pokemonOnHand[0].name+"</p><progress id='player_pok_hp' value="+game.player.pokemonOnHand[0].fightHp+" max="+game.player.pokemonOnHand[0].hp+"></progress><img id='opponantPokemon' src="+ fightOpponant.pokemonOnHand[0].front_picture+"></img><p id='opponant_pok_name'>"+fightOpponant.pokemonOnHand[0].name+"</p><progress id='opponant_pok_hp' value="+fightOpponant.pokemonOnHand[0].fightHp+" max="+fightOpponant.pokemonOnHand[0].hp+"></progress> <img id='fight_textbox' src='/img/message.png'></img>"};
+        
 
         if (game.player.turn == true) {
 
           game.fight(game.player, fightOpponant, game.calcDamage);
-          updateUI();
+          updateUI(game, fightOpponant);
          fightScreen.innerHTML += "<p id='move_text'>Your "+game.player.pokemonOnHand[0].name+" used "+game.player.pokemonOnHand[0].move+" against "+fightOpponant.pokemonOnHand[0].name+"!</p>";
 
         } 
         else {
           game.fight(game.player, fightOpponant, game.calcDamage);
-          updateUI();
+          updateUI(game, fightOpponant);
          fightScreen.innerHTML += "<p id='move_text'>"+fightOpponant.pokemonOnHand[0].name+" used "+fightOpponant.pokemonOnHand[0].move+" against your"+game.player.pokemonOnHand[0].name+"!</p>";
         }
         
@@ -728,8 +724,14 @@ var Map = function(pokemonData, Player, Pokemon) {
       /////////// STARTS THE GYM FIGHTS ///////////////////
       
       if ((x == 90 || x == 450) && y == 190){
+        if (game.player.pokemonOnHand.length >= 1 && fightOpponant.pokemonOnHand.length >= 1) {
+          console.log(opponant);
+         toggleViews(mapCanvas, fightScreen);
+         ui.initiateFight(game, fightOpponant);
+         
+         generateMiniatures(game.player, fightOpponant);
+        }
 
-        initiateFight(fightOpponant);
         console.log('call initiate at gym')
       } 
 
