@@ -2,13 +2,14 @@
 var Game = require('./game');
 var FightUI = require('./fightUI');
 var TalkUI = require('./talkUI');
+var HomeUI = require('./homeUI');
 //// need to require player for coordinates ////////
 var Map = function(pokemonData, Player, Pokemon) {
 
-  
   var game = new Game(pokemonData, Player, Pokemon);
   var fightUI = new FightUI(game, fightScreen);
   var talkUI = new TalkUI(game, craigScreen, simonScreen, zsoltScreen);
+  var homeUI = new HomeUI();
 
   var welcomeScreen = document.querySelector('#welcomeScreen');
   var chooseScreen = document.querySelector('#choose_screen');
@@ -226,7 +227,6 @@ var Map = function(pokemonData, Player, Pokemon) {
 
       if (event.keyCode === 38) {
         // up
-
         if (y <= 20) {
           moveAsh(ashUp, 0, 0);
         }
@@ -258,11 +258,6 @@ var Map = function(pokemonData, Player, Pokemon) {
         }
         else if (x >= 170 && x <= 230 && 20 === y) {
           moveAsh(ashDown, 0, 0);
-
-
-
-
-
         }
         else if (y === 260 && 210 <= x && x <= 270) {
           moveAsh(ashDown, 0, 0);
@@ -277,19 +272,11 @@ var Map = function(pokemonData, Player, Pokemon) {
         // h
         if ((x === 50 || x===60) && y === 420) {
           toggleViews(mapCanvas, homeScreen);
-          atHome();
+          homeUI.atHome(game, homeScreen);
         }
-
       }
-
-
     }
-    
   };
-
-
-  
-
 
   ///////////// GRASS FIGHT ON /////////////////////////////////////////////////////////////////
   var checkIfInGrass = function() {
@@ -301,13 +288,13 @@ var Map = function(pokemonData, Player, Pokemon) {
       if (randNum === 10) {
         randNum = 0;
         console.log('you are being attacked');
-   
+
         fightOpponant = game.grassOpponant;
         if (game.player.pokemonOnHand.length >= 1 && fightOpponant.pokemonOnHand.length >= 1) {
           toggleViews(mapCanvas, fightScreen);
           fightUI.initiateFight(fightScreen, game, fightOpponant);
-   
-          generateMiniatures(game.player, fightOpponant);
+
+          fightUI.generateMiniatures(fightScreen, game.player, fightOpponant);
         }
         console.log(fightOpponant);
       }
@@ -330,285 +317,6 @@ var Map = function(pokemonData, Player, Pokemon) {
   }
   ///////////// GRASS FIGHT OVER /////////////////////////////////////////////////////////////////
 
-  //////////// AT HOME ////////////////////////////////////////////////////////////////////////
-
-  var atHome = function() {
-    ////////////// REVIVE FAINTED POKEMONS //////////////////////////////////////////////////////
-    game.revivePokemons(game.player);
-    //////////////// SETUP HTML //////////////////////////////////////////////////////////////////
-    homeScreen.innerHTML = "";
-    var welcomeAtHome = document.createElement('p');
-    welcomeAtHome.innerText = "Welcome home " + game.player.name +"! Here you can take a rest and let your Pokémon rest too. Once you leave home, your Pokémon will be again strong and healthy. Press A to hit the world!";
-    homeScreen.appendChild(welcomeAtHome);
-    //////////////////////// POKEDEX SELECTION ///////////////////////////////////////////////////
-    var selectionContainer = document.createElement('div');
-    homeScreen.appendChild(selectionContainer);
-    var pokedexSelection = document.createElement('select');
-    pokedexSelection.className = 'selection';
-    var populateSelectionDropDown = function () {
-      if (game.player.pokedex.length >=1) {
-        game.player.pokedex.sort(function(a, b) {
-          return a.id - b.id;
-        });
-        selectionContainer.innerHTML = "";
-        var selectionAdvice = document.createElement('p');
-        selectionAdvice.innerText = "Choose a Pokémon from Pokedex";
-        selectionContainer.appendChild(selectionAdvice);
-        selectionContainer.appendChild(pokedexSelection);
-        var predefinedPokeOption = document.createElement('option');
-        predefinedPokeOption.innerText = "...";
-        pokedexSelection.innerHTML = "";
-        pokedexSelection.appendChild(predefinedPokeOption);
-        for(var each of game.player.pokedex) {
-          var pokeOption = document.createElement('option');
-          pokeOption.innerText = each.name;
-          pokedexSelection.appendChild(pokeOption);
-        }
-      }
-      else {
-        selectionContainer.innerHTML = "";
-        var selectionAdvice = document.createElement('p');
-        selectionAdvice.innerText = "Pokedex empty";
-        selectionContainer.appendChild(selectionAdvice);
-      }
-    }
-
-    populateSelectionDropDown();
-
-    var pokemonDetails = document.createElement('div');
-    homeScreen.appendChild(pokemonDetails);
-
-    var handleSelectChange = function(event) {
-      pokemonDetails.innerHTML="";
-      var p = document.createElement('p');
-      var img = document.createElement('img');
-      var nameOfSelectedPokemon = "";
-      for(var each of game.player.pokedex) {
-        if (each.name === this.value) {
-          p.innerText += "Name: " + each.name;
-          nameOfSelectedPokemon = each.name;
-          p.innerText += "\nHP: " + each.hp;
-          p.innerText += "\nAttack: " + each.attack;
-          p.innerText += "\nDefense: " + each.defense;
-          img.src = each.front_picture;
-        }
-      }
-      pokemonDetails.appendChild(img);
-      pokemonDetails.appendChild(p);
-      var addToHandButton = document.createElement('button');
-      addToHandButton.innerText = "Add to hand";
-      addToHandButton.className = 'selection';
-      pokemonDetails.appendChild(addToHandButton);
-
-      var handleButtonClick = function(){
-        if (game.player.pokedex.length >= 1) {
-          for(var i = 0; i < game.player.pokedex.length; i++) {
-            if (game.player.pokedex[i].name === nameOfSelectedPokemon) {
-              if (game.player.pokemonOnHand.length < 6) {
-                game.player.pokemonOnHand.push(game.player.pokedex[i]);
-                game.player.pokedex.splice(i, 1);
-                pokemonDetails.innerHTML="";
-              }
-            }
-          }
-        }
-        populateSelectionDropDown();
-        generatePokemonOnHandOnScreen();
-      }
-      addToHandButton.onclick = handleButtonClick;
-      console.log('event', event);
-    }
-
-    pokedexSelection.onchange = handleSelectChange;
-    //////////////// AT HOME END OF POKEDEX SELECTION /////////////////////////////
-
-    //////////////// AT HOME START OF POKEMON ON HAND /////////////////////////////
-    var handShowContainer = document.createElement('div');
-    homeScreen.appendChild(handShowContainer);
-    var generatePokemonOnHandOnScreen = function() {
-
-        handShowContainer.innerHTML = "";
-        var pok0img = document.createElement('img');
-        var pok1img = document.createElement('img');
-        var pok2img = document.createElement('img');
-        var pok3img = document.createElement('img');
-        var pok4img = document.createElement('img');
-        var pok5img = document.createElement('img');
-        var populatePokemonPics = function() {
-          handShowContainer.innerHTML = "";
-          if (game.player.pokemonOnHand.length === 6) {
-            pok0img.src = game.player.pokemonOnHand[0].front_picture;
-            pok0img.onload = function() {
-              handShowContainer.appendChild(pok0img);
-            }
-            pok1img.src = game.player.pokemonOnHand[1].front_picture;
-            handShowContainer.appendChild(pok1img);
-            pok2img.src = game.player.pokemonOnHand[2].front_picture;
-            handShowContainer.appendChild(pok2img);
-            pok3img.src = game.player.pokemonOnHand[3].front_picture;
-            handShowContainer.appendChild(pok3img);
-            pok4img.src = game.player.pokemonOnHand[4].front_picture;
-            handShowContainer.appendChild(pok4img);
-            pok5img.src = game.player.pokemonOnHand[5].front_picture;
-            handShowContainer.appendChild(pok5img);
-          }
-          else if (game.player.pokemonOnHand.length === 5) {
-            pok0img.src = game.player.pokemonOnHand[0].front_picture;
-            handShowContainer.appendChild(pok0img);
-            pok1img.src = game.player.pokemonOnHand[1].front_picture;
-            handShowContainer.appendChild(pok1img);
-            pok2img.src = game.player.pokemonOnHand[2].front_picture;
-            handShowContainer.appendChild(pok2img);
-            pok3img.src = game.player.pokemonOnHand[3].front_picture;
-            handShowContainer.appendChild(pok3img);
-            pok4img.src = game.player.pokemonOnHand[4].front_picture;
-            handShowContainer.appendChild(pok4img);
-          }
-          else if (game.player.pokemonOnHand.length === 4) {
-            pok0img.src = game.player.pokemonOnHand[0].front_picture;
-            handShowContainer.appendChild(pok0img);
-            pok1img.src = game.player.pokemonOnHand[1].front_picture;
-            handShowContainer.appendChild(pok1img);
-            pok2img.src = game.player.pokemonOnHand[2].front_picture;
-            handShowContainer.appendChild(pok2img);
-            pok3img.src = game.player.pokemonOnHand[3].front_picture;
-            handShowContainer.appendChild(pok3img);
-          }
-          else if (game.player.pokemonOnHand.length === 3) {
-            pok0img.src = game.player.pokemonOnHand[0].front_picture;
-            handShowContainer.appendChild(pok0img);
-            pok1img.src = game.player.pokemonOnHand[1].front_picture;
-            handShowContainer.appendChild(pok1img);
-            pok2img.src = game.player.pokemonOnHand[2].front_picture;
-            handShowContainer.appendChild(pok2img);
-          }
-          else if (game.player.pokemonOnHand.length === 2) {
-            pok0img.src = game.player.pokemonOnHand[0].front_picture;
-            pok0img.onload = function() {
-              handShowContainer.appendChild(pok0img);
-            }
-            pok1img.src = game.player.pokemonOnHand[1].front_picture;
-            pok1img.onload = function() {
-              handShowContainer.appendChild(pok1img);
-            }
-          }
-          else if (game.player.pokemonOnHand.length === 1) {
-            pok0img.src = game.player.pokemonOnHand[0].front_picture;
-            pok0img.onload = function() {
-              handShowContainer.appendChild(pok0img);
-            }
-          }
-        }
-        
-        populatePokemonPics();
-
-        pok0img.onclick = function() {
-          var pokemonToBeMoved = game.player.pokemonOnHand[0];
-          game.player.pokedex.push(pokemonToBeMoved);
-          game.player.pokemonOnHand.splice(0, 1);
-          populateSelectionDropDown();
-          populatePokemonPics();
-        }
-        pok1img.onclick = function() {
-          var pokemonToBeMoved = game.player.pokemonOnHand[1];
-          game.player.pokedex.push(pokemonToBeMoved);
-          game.player.pokemonOnHand.splice(1, 1);
-          populateSelectionDropDown();
-          populatePokemonPics();
-        }
-        pok2img.onclick = function() {
-          var pokemonToBeMoved = game.player.pokemonOnHand[2];
-          game.player.pokedex.push(pokemonToBeMoved);
-          game.player.pokemonOnHand.splice(2, 1);
-          populateSelectionDropDown();
-          populatePokemonPics();
-        }
-        pok3img.onclick = function() {
-          var pokemonToBeMoved = game.player.pokemonOnHand[3];
-          game.player.pokedex.push(pokemonToBeMoved);
-          game.player.pokemonOnHand.splice(3, 1);
-          populateSelectionDropDown();
-          populatePokemonPics();
-        }
-        pok4img.onclick = function() {
-          var pokemonToBeMoved = game.player.pokemonOnHand[4];
-          game.player.pokedex.push(pokemonToBeMoved);
-          game.player.pokemonOnHand.splice(4, 1);
-          populateSelectionDropDown();
-          populatePokemonPics();
-        }
-        pok5img.onclick = function() {
-          var pokemonToBeMoved = game.player.pokemonOnHand[5];
-          game.player.pokedex.push(pokemonToBeMoved);
-          game.player.pokemonOnHand.splice(5, 1);
-          populateSelectionDropDown();
-          populatePokemonPics();
-        }
-
-    }
-    
-    generatePokemonOnHandOnScreen();
-        
-
-    /////////////// AT HOME END OF POKEMON ON HAND /////////////////////////////////
-
-    ///////////////////////// LEAVE HOME ////////////////////////////////////
-
-  };
-  //////////// END OF AT HOME ////////////////////////////////////////////////////////////////////////
-
-
-  //////////////////////// WITH CRAIG or SIMON 
-  //talkUI.js
-  ////////////////////////////////////////////
- 
-
-  ///////////// GENERATE MINI PICTURES OF POKEMON IN FIGHT ////////////////////////////////////////
-  
-  var generateMiniatures = function(player,opponant) {
-    console.log('generating miniatures');
-
-    var playerDiv = document.createElement('div');
-    playerDiv.className = 'player_div';
-    fightScreen.appendChild(playerDiv);
-    if (player.pokemonOnHand.length > 0) {
-      console.log('generating miniatures inside');
-      for (var i = 1; i < player.pokemonOnHand.length; i++) {
-        var miniPic = document.createElement('img');
-        miniPic.src = player.pokemonOnHand[i].front_picture;
-        miniPic.className = 'minipic_on_hand';
-        playerDiv.appendChild(miniPic);
-      }
-    }
-    if (player.faintedPokemons.length > 0) {
-      for (var each of player.faintedPokemons) {
-        var miniPic = document.createElement('img');
-        miniPic.src = each.front_picture;
-        miniPic.className = 'minipic_fainted';
-        playerDiv.appendChild(miniPic);
-      }
-    }
-    
-    var opponantDiv = document.createElement('div');
-    fightScreen.appendChild(opponantDiv);
-    opponantDiv.className = 'opponant_div';
-    if (opponant.pokemonOnHand.length > 0) {
-      for (var i = 1; i < opponant.pokemonOnHand.length; i++) {
-        var miniPic = document.createElement('img');
-        miniPic.src = opponant.pokemonOnHand[i].front_picture;
-        miniPic.className = 'minipic_on_hand';
-        opponantDiv.appendChild(miniPic);
-      }
-    }
-    if (opponant.faintedPokemons.length > 0) {
-      for (var each of opponant.faintedPokemons) {
-        var miniPic = document.createElement('img');
-        miniPic.src = each.front_picture;
-        miniPic.className = 'minipic_fainted';
-        opponantDiv.appendChild(miniPic);
-      }
-    }
-  };
 
   //////////////// BUTTONS ///////////////////////////////////////////////////////////////////////
   upButton.onclick = function(){
@@ -670,38 +378,27 @@ var Map = function(pokemonData, Player, Pokemon) {
 
   aButton.onclick = function(){
     ////////////////////////////////////////////
-    
-
-    ////////////////////////////////////////////
 
     ///////////////////IN FIGHT////////////////////////
 
     if (fightScreen.style.zIndex == 100 ) {
 
       if (game.player.pokemonOnHand.length >= 1 && fightOpponant.pokemonOnHand.length >= 1) {
-
-     
-          
-          console.log('fight called');
-        
-
-        
-
+        console.log('fight called');
         if (game.player.turn == true) {
 
           game.fight(game.player, fightOpponant, game.calcDamage);
           fightUI.updateUI(fightScreen, game, fightOpponant);
-         fightScreen.innerHTML += "<p id='move_text'>Your "+game.player.pokemonOnHand[0].name+" used "+game.player.pokemonOnHand[0].move+" against "+fightOpponant.pokemonOnHand[0].name+"!</p>";
-
+          fightUI.playerMove(fightScreen, game, fightOpponant);
         } 
         else {
           game.fight(game.player, fightOpponant, game.calcDamage);
           fightUI.updateUI(fightScreen, game, fightOpponant);
-         fightScreen.innerHTML += "<p id='move_text'>"+fightOpponant.pokemonOnHand[0].name+" used "+fightOpponant.pokemonOnHand[0].move+" against your"+game.player.pokemonOnHand[0].name+"!</p>";
+          fightUI.opponantMove(fightScreen, game, fightOpponant);
         }
         
-        generateMiniatures(game.player, fightOpponant);
-          
+        fightUI.generateMiniatures(fightScreen, game.player, fightOpponant);
+
         console.log('fight called');
         
         ///////////////////////////////////////
@@ -717,10 +414,8 @@ var Map = function(pokemonData, Player, Pokemon) {
           game.getFaintedPokemon(game.player, game.grassOpponant);
         }
         console.log('player', game.player)
-        toggleViews(fightScreen, mapCanvas);
-        
+        toggleViews(fightScreen, mapCanvas); 
       }
-
     }
 
     ///////////// IN HOME /////////////////
@@ -757,11 +452,11 @@ var Map = function(pokemonData, Player, Pokemon) {
       if ((x == 90 || x == 450) && y == 190){
         if (game.player.pokemonOnHand.length >= 1 && fightOpponant.pokemonOnHand.length >= 1) {
           console.log(fightOpponant);
-         toggleViews(mapCanvas, fightScreen);
-         console.log('views toggled');
-         fightUI.initiateFight(fightScreen, game, fightOpponant);
-         
-         generateMiniatures(game.player, fightOpponant);
+          toggleViews(mapCanvas, fightScreen);
+          console.log('views toggled');
+          fightUI.initiateFight(fightScreen, game, fightOpponant);
+
+          fightUI.generateMiniatures(fightScreen, game.player, fightOpponant);
         }
 
         console.log('call initiate at gym')
@@ -771,7 +466,7 @@ var Map = function(pokemonData, Player, Pokemon) {
 
       else if (x === 50 && y === 420) {
         toggleViews(mapCanvas, homeScreen);
-        atHome();
+        homeUI.atHome(game, homeScreen);
         console.log('zIndex of mapCanvas', mapCanvas.style.zIndex);
       }
       ////////////// AROUND CRAIG OR SIMON OR ZSOLT ///////////////
@@ -779,7 +474,6 @@ var Map = function(pokemonData, Player, Pokemon) {
         toggleViews(mapCanvas, craigScreen);
         talkUI.withCraig(game, craigScreen);
       }
-
       else if (x === 490  && y === 190 ) {
         toggleViews(mapCanvas, simonScreen);
         talkUI.withSimon(game, simonScreen);
@@ -804,59 +498,59 @@ var Map = function(pokemonData, Player, Pokemon) {
   }
   ////////////// END OF ABUTTON //////////////////////
 
-///////////// WIN SCREEN ///////////////////////
+  ///////////// WIN SCREEN ///////////////////////
 
-/////////// 01 WELCOME SCREEN ////////////////  
-nameSubmitButton.onclick = function() {
-  var nameToAdd = document.querySelector('#name_to_add');
-  game.player.setPlayersName(nameToAdd.value.toUpperCase());
-  //////
+  /////////// 01 WELCOME SCREEN ////////////////  
+  nameSubmitButton.onclick = function() {
+    var nameToAdd = document.querySelector('#name_to_add');
+    game.player.setPlayersName(nameToAdd.value.toUpperCase());
+    //////
 
-  game.populateOpponant(game.grassOpponant, 1);
-  game.populateOpponant(game.gymOpponant1, 3);
-  game.populateOpponant(game.gymOpponant2, 3);
-  console.log('opponants pokemon', game.grassOpponant.pokemonOnHand[0]);
+    game.populateOpponant(game.grassOpponant, 1);
+    game.populateOpponant(game.gymOpponant1, 3);
+    game.populateOpponant(game.gymOpponant2, 3);
+    console.log('opponants pokemon', game.grassOpponant.pokemonOnHand[0]);
 
-  toggleViews(welcomeScreen, chooseScreen);
+    toggleViews(welcomeScreen, chooseScreen);
 
-  /////////// 02 CHOOSE SCREEN ////////////////  
-  var welcomeQuote = document.createElement('p');
-  chooseScreen.innerHTML = "";
-  welcomeQuote.innerText = "Hey " + game.player.name + "! Choose your Pokémon, then... Go Away!"
-  chooseScreen.appendChild(welcomeQuote);
+    /////////// 02 CHOOSE SCREEN ////////////////  
+    var welcomeQuote = document.createElement('p');
+    chooseScreen.innerHTML = "";
+    welcomeQuote.innerText = "Hey " + game.player.name + "! Choose your Pokémon, then... Go Away!"
+    chooseScreen.appendChild(welcomeQuote);
 
-  welcomeQuote.id ='welcomeQuote';
+    welcomeQuote.id ='welcomeQuote';
 
-  var matthewPic = document.createElement('img');
-  matthewPic.id ='mattOak';
-  matthewPic.src = './img/matt.png';
-  chooseScreen.appendChild(matthewPic);
+    var matthewPic = document.createElement('img');
+    matthewPic.id ='mattOak';
+    matthewPic.src = './img/matt.png';
+    chooseScreen.appendChild(matthewPic);
 
-  chooseScreen.appendChild(charmanderPic);
-  chooseScreen.appendChild(bulbasaurPic);
-  chooseScreen.appendChild(squirtlePic);
+    chooseScreen.appendChild(charmanderPic);
+    chooseScreen.appendChild(bulbasaurPic);
+    chooseScreen.appendChild(squirtlePic);
 
-  bulbasaurPic.onclick = function() {
-   game.playerPicksPokemon("BLASTOISE");
-   console.log('sweet you have choosen bulbi! its gonna be muddy', game.player.pokemonOnHand[0]);
-   toggleViews(chooseScreen, mapCanvas);
+    bulbasaurPic.onclick = function() {
+     game.playerPicksPokemon("BLASTOISE");
+     console.log('sweet you have choosen bulbi! its gonna be muddy', game.player.pokemonOnHand[0]);
+     toggleViews(chooseScreen, mapCanvas);
+   }
+
+   charmanderPic.onclick = function() {
+     game.playerPicksPokemon("CHARMANDER");
+     console.log('sweet you have choosen charmi! its gonna be hot', game.player.pokemonOnHand[0]);
+     toggleViews(chooseScreen, mapCanvas);
+   }
+
+   squirtlePic.onclick = function() {
+     game.playerPicksPokemon("SQUIRTLE");
+     console.log('sweet you have choosen squirty! its gonna be wet', game.player.pokemonOnHand[0]);
+     toggleViews(chooseScreen, mapCanvas);
+   }
+
  }
 
- charmanderPic.onclick = function() {
-   game.playerPicksPokemon("CHARMANDER");
-   console.log('sweet you have choosen charmi! its gonna be hot', game.player.pokemonOnHand[0]);
-   toggleViews(chooseScreen, mapCanvas);
- }
-
- squirtlePic.onclick = function() {
-   game.playerPicksPokemon("SQUIRTLE");
-   console.log('sweet you have choosen squirty! its gonna be wet', game.player.pokemonOnHand[0]);
-   toggleViews(chooseScreen, mapCanvas);
- }
-
-}
-
-var checkForWin = function() {
+ var checkForWin = function() {
   var pokeSum = 0;
   pokeSum = game.player.pokemonOnHand.length + game.player.faintedPokemons.length + game.player.pokedex.length;
   if (pokeSum === 151) {
