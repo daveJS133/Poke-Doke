@@ -6,7 +6,7 @@ var UI = require('./views/ui');
 
 var app = function() {
  
-  // new UI();
+  new UI();
  
 
   var makeRequest = function(url, callback){

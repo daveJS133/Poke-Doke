@@ -283,9 +283,8 @@ var Map = function(pokemonData, Player, Pokemon) {
    
         fightOpponant = game.grassOpponant;
         if (game.player.pokemonOnHand.length >= 1 && fightOpponant.pokemonOnHand.length >= 1) {
-          console.log(opponant);
           toggleViews(mapCanvas, fightScreen);
-          ui.initiateFight(game, fightOpponant);
+          ui.initiateFight(fightScreen, game, fightOpponant);
    
           generateMiniatures(game.player, fightOpponant);
         }
@@ -673,13 +672,13 @@ var Map = function(pokemonData, Player, Pokemon) {
         if (game.player.turn == true) {
 
           game.fight(game.player, fightOpponant, game.calcDamage);
-          updateUI(game, fightOpponant);
+          ui.updateUI(fightScreen, game, fightOpponant);
          fightScreen.innerHTML += "<p id='move_text'>Your "+game.player.pokemonOnHand[0].name+" used "+game.player.pokemonOnHand[0].move+" against "+fightOpponant.pokemonOnHand[0].name+"!</p>";
 
         } 
         else {
           game.fight(game.player, fightOpponant, game.calcDamage);
-          updateUI(game, fightOpponant);
+          ui.updateUI(fightScreen, game, fightOpponant);
          fightScreen.innerHTML += "<p id='move_text'>"+fightOpponant.pokemonOnHand[0].name+" used "+fightOpponant.pokemonOnHand[0].move+" against your"+game.player.pokemonOnHand[0].name+"!</p>";
         }
         
@@ -727,7 +726,7 @@ var Map = function(pokemonData, Player, Pokemon) {
         if (game.player.pokemonOnHand.length >= 1 && fightOpponant.pokemonOnHand.length >= 1) {
           console.log(opponant);
          toggleViews(mapCanvas, fightScreen);
-         ui.initiateFight(game, fightOpponant);
+         ui.initiateFight(fightScreen, game, fightOpponant);
          
          generateMiniatures(game.player, fightOpponant);
         }
