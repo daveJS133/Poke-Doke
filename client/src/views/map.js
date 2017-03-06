@@ -315,10 +315,7 @@ var Map = function(pokemonData, Player, Pokemon) {
       console.log(fightOpponant);
     }
   }
-  ///////////// GRASS FIGHT OVER /////////////////////////////////////////////////////////////////
-
-
-  //////////////// BUTTONS ///////////////////////////////////////////////////////////////////////
+ 
   upButton.onclick = function(){
     if (y <= 20) {
       moveAsh(ashUp, 0, 0);
@@ -547,7 +544,6 @@ var Map = function(pokemonData, Player, Pokemon) {
      console.log('sweet you have choosen squirty! its gonna be wet', game.player.pokemonOnHand[0]);
      toggleViews(chooseScreen, mapCanvas);
    }
-
  }
 
  var checkForWin = function() {
@@ -563,7 +559,6 @@ var Map = function(pokemonData, Player, Pokemon) {
 var toggleViews = function(recentView, nextView) {
   recentView.style.zIndex = 1;
   nextView.style.zIndex = 100;
-
 }
 
 loadCanvas();
