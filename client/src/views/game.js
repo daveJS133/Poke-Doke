@@ -6,7 +6,6 @@ var Game = function(data, Player, Pokemon){
   this.grassOpponant = new Player;
   this.gymOpponant1 = new Player;
   this.gymOpponant2 = new Player;
- 
 
 };
 
@@ -30,11 +29,41 @@ Game.prototype = {
       // MISSING CASE WHEN YOU CAUGHT THEM ALL //        
       //                                       //
       ///////////////////////////////////////////
-      for(i = 0; i < numOfEnemies; i++){
-        console.log(this);
-        var takenPokemon = this.unusedPokemon.splice(Math.floor(Math.random()*this.unusedPokemon.length), 1)[0];
-        takenPokemon.fightHp = takenPokemon.hp;
-        opponant.pokemonOnHand.push(takenPokemon);
+      if (this.unusedPokemon.length >0) {
+        for(i = 0; i < numOfEnemies; i++){
+          console.log(this);
+          if (opponant == this.gymOpponant1) {
+            /// electric
+            for (var each of this.unusedPokemon) {
+              if (opponant.pokemonOnHand.length < 3) {
+                if (each.type == "electric") {
+                  var elecPokemon = each;
+                  elecPokemon.fightHp = elecPokemon.hp;
+                  opponant.pokemonOnHand.push(elecPokemon);
+                }
+              }
+            }
+            console.log('elec opponant', opponant);
+          }
+          else if (opponant == this.gymOpponant2) {
+            /// electric
+            for (var each of this.unusedPokemon) {
+              if (opponant.pokemonOnHand.length < 3) {
+                if (each.type == "grass") {
+                  var grassPokemon = each;
+                  grassPokemon.fightHp = grassPokemon.hp;
+                  opponant.pokemonOnHand.push(grassPokemon);
+                }
+              }
+            }
+            console.log('grass opponant', opponant);
+          }
+          else {
+            var takenPokemon = this.unusedPokemon.splice(Math.floor(Math.random()*this.unusedPokemon.length), 1)[0];
+            takenPokemon.fightHp = takenPokemon.hp;
+            opponant.pokemonOnHand.push(takenPokemon);
+          }    
+        }
       }
     },
 

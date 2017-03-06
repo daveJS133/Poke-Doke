@@ -24,6 +24,12 @@ var app = function() {
 
 
         var pokemonData = jsonObject;
+
+        for (var each of pokemonData) {
+          var nameCapitalised = each.name.toUpperCase();
+          each.name = nameCapitalised;
+        }
+        
         new Map(pokemonData, Player, Pokemon);
       });
   }
