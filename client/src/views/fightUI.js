@@ -1,14 +1,9 @@
-var Game = require('./game');
-
+// var Game = require('./game');
 
 var UI = function(game, fightScreen) {
 this.game = game;
-this.welcomeScreen = welcomeScreen;
-// this.chooseScreen = chooseScreen;
 this.fightScreen = fightScreen;
-// this.homeScreen = homeScreen;
-// this.craigScreen = craigScreen;
-// this.mapCanvas = mapCanvas;
+
 }
 
 UI.prototype = {
