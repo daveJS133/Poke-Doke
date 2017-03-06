@@ -1,12 +1,15 @@
 //// HANDLE MOVEMENT ON MAP ////////////
 var Game = require('./game');
-var UI = require('./ui');
+var FightUI = require('./fightUI');
+var TalkUI = require('./talkUI');
 //// need to require player for coordinates ////////
 var Map = function(pokemonData, Player, Pokemon) {
 
   
   var game = new Game(pokemonData, Player, Pokemon);
-  var ui = new UI(game, welcomeScreen, chooseScreen, fightScreen, homeScreen, craigScreen, mapCanvas);
+  var fightUI = new FightUI(game, fightScreen);
+  var talkUI = new TalkUI(game, craigScreen, simonScreen, zsoltScreen);
+
   var welcomeScreen = document.querySelector('#welcomeScreen');
   var chooseScreen = document.querySelector('#choose_screen');
   var fightScreen = document.querySelector('#fight_screen');
@@ -302,7 +305,7 @@ var Map = function(pokemonData, Player, Pokemon) {
         fightOpponant = game.grassOpponant;
         if (game.player.pokemonOnHand.length >= 1 && fightOpponant.pokemonOnHand.length >= 1) {
           toggleViews(mapCanvas, fightScreen);
-          ui.initiateFight(fightScreen, game, fightOpponant);
+          fightUI.initiateFight(fightScreen, game, fightOpponant);
    
           generateMiniatures(game.player, fightOpponant);
         }
@@ -555,28 +558,10 @@ var Map = function(pokemonData, Player, Pokemon) {
   //////////// END OF AT HOME ////////////////////////////////////////////////////////////////////////
 
 
-  //////////////////////// WITH CRAIG or SIMON ////////////////////////////////////////////
-  var withCraig = function() {
-    craigScreen.innerHTML = "<p id='craigSpeech'>Hi "+game.player.name+"! My name is CRIG MORTOB!  Be careful... the Meadows are full of wild Pokémon and there also some tough trainers in our gyms!</p><img src='./img/brockCraig.png' id='brockCraig'>";
-  }
-
-  var withSimon = function() {
-    if(game.gymOpponant2.pokemonOnHand.length > 0){
-      simonScreen.innerHTML = "<p id='simonSpeech'>Morning guys! My Name is SIMON. Step inside and I will take you on with my grassy friends!</p><img src='./img/simon2.png' id='zsoltachu'><img src='./img/grassIcon.png' id='gymBadge'>";
-    }
-    else{
-      simonScreen.innerHTML = "<p id='simonSpeech'> Wow, you guys are SO talented! Here is a badge for yourselves!</p><img src='./img/simon2.png' id='zsoltachu'><img src='./img/earthBadge.png' id='gymBadge'>";
-    }
-  }
-
-  var withZsolt = function() {
-    if(game.gymOpponant1.pokemonOnHand.length > 0){
-      zsoltScreen.innerHTML = "<p id='zsoltSpeech'>HELLO!!! My Name is ZSOLT. Fight my electric buddies and feel the ZSOLTAGE!!!</p><img src='./img/zsoltBod.png' id='zsoltachu'><img src='./img/electricIcon.png' id='gymBadge'>";
-    }
-    else{
-      zsoltScreen.innerHTML = "<p id='zsoltSpeech'> Wow, good stuff! You are beautiful people! Take this badge, you earned it!</p><img src='./img/zsoltBod.png' id='zsoltachu'><img src='./img/thunderBadge.png' id='gymBadge'>";
-    }
-  }
+  //////////////////////// WITH CRAIG or SIMON 
+  //talkUI.js
+  ////////////////////////////////////////////
+ 
 
   ///////////// GENERATE MINI PICTURES OF POKEMON IN FIGHT ////////////////////////////////////////
   
@@ -705,13 +690,13 @@ var Map = function(pokemonData, Player, Pokemon) {
         if (game.player.turn == true) {
 
           game.fight(game.player, fightOpponant, game.calcDamage);
-          ui.updateUI(fightScreen, game, fightOpponant);
+          fightUI.updateUI(fightScreen, game, fightOpponant);
          fightScreen.innerHTML += "<p id='move_text'>Your "+game.player.pokemonOnHand[0].name+" used "+game.player.pokemonOnHand[0].move+" against "+fightOpponant.pokemonOnHand[0].name+"!</p>";
 
         } 
         else {
           game.fight(game.player, fightOpponant, game.calcDamage);
-          ui.updateUI(fightScreen, game, fightOpponant);
+          fightUI.updateUI(fightScreen, game, fightOpponant);
          fightScreen.innerHTML += "<p id='move_text'>"+fightOpponant.pokemonOnHand[0].name+" used "+fightOpponant.pokemonOnHand[0].move+" against your"+game.player.pokemonOnHand[0].name+"!</p>";
         }
         
@@ -771,9 +756,10 @@ var Map = function(pokemonData, Player, Pokemon) {
 
       if ((x == 90 || x == 450) && y == 190){
         if (game.player.pokemonOnHand.length >= 1 && fightOpponant.pokemonOnHand.length >= 1) {
-          console.log(opponant);
+          console.log(fightOpponant);
          toggleViews(mapCanvas, fightScreen);
-         ui.initiateFight(fightScreen, game, fightOpponant);
+         console.log('views toggled');
+         fightUI.initiateFight(fightScreen, game, fightOpponant);
          
          generateMiniatures(game.player, fightOpponant);
         }
@@ -791,16 +777,16 @@ var Map = function(pokemonData, Player, Pokemon) {
       ////////////// AROUND CRAIG OR SIMON OR ZSOLT ///////////////
       else if (x === 240 && y === 340) {
         toggleViews(mapCanvas, craigScreen);
-        withCraig();
+        talkUI.withCraig(game, craigScreen);
       }
 
       else if (x === 490  && y === 190 ) {
         toggleViews(mapCanvas, simonScreen);
-        withSimon();
+        talkUI.withSimon(game, simonScreen);
       }
       else if (x === 130  && y === 190 ) {
         toggleViews(mapCanvas, zsoltScreen);
-        withZsolt();
+        talkUI.withZsolt(game, zsoltScreen);
       }
     }
 

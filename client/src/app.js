@@ -2,11 +2,11 @@
 var Player = require('./models/player');
 var Pokemon = require('./models/pokemon');
 var Map = require('./views/map');
-var UI = require('./views/ui');
+// var UI = require('./views/ui');
 
 var app = function() {
  
-  new UI();
+  // new UI();
  
 
   var makeRequest = function(url, callback){
