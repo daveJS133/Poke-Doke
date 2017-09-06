@@ -1,5 +1,29 @@
 # Poke-Doke - A node, express, canvas JS browser game using Pokemon API 2.0
 
+## To run:
+
+   * Run `npm install` in the terminal at the project's root directory to install dependencies.
+   
+   * Run `./mongod` to start the database and **leave this tab running** (open a new tab).
+   
+   * Run `mongo < seeds.js` to seed the database.
+   
+   * Run `npm start` to start the applicaiton. **Leave this tab running**
+     
+   * `cd client`into the client folder and run `webpack -w` **Leave this tab running**
+   
+
+## To play:
+
+Open your browser and enter [http://localhost:3000/] as the url then hide browser's toolbar and enter fullscreen mode.
+
+
+## API:
+The api can be viewed at [http://localhost:3000/sourcePokemons]
+
+
+## How the game works:
+
 Selected data is saved from the API to the mongoDB database & our own API is then created from this data.
 
 You can use either the arrow keys on the keyboard or the buttons on the screen to control your character.
